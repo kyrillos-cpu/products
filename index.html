@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f5f3f">
+<title>المركبات والأسمدة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --green:#1f5f3f; --green2:#2d7d55; --soft:#eaf4ee; --bg:#f5f7f6; --card:#fff;
+  --text:#1d2a24; --muted:#6b7a72; --line:#e2e8e4; --red:#c0392b; --amber:#c27c0e;
+  --radius:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:'Cairo',system-ui,sans-serif;font-size:15px}
+button,input,select,textarea{font-family:inherit;font-size:15px}
+.hidden{display:none!important}
+
+/* ===== Header ===== */
+header{position:sticky;top:0;z-index:20;background:var(--green);color:#fff;padding:12px 14px 10px;padding-top:max(12px,env(safe-area-inset-top))}
+.hrow{display:flex;align-items:center;gap:10px}
+.hrow h1{font-size:19px;margin:0;flex:1;font-weight:800}
+.icon-btn{background:rgba(255,255,255,.15);border:0;color:#fff;width:38px;height:38px;border-radius:10px;font-size:18px;cursor:pointer}
+.stats{display:flex;gap:8px;margin-top:8px;font-size:12.5px;opacity:.95;flex-wrap:wrap}
+.stats span{background:rgba(255,255,255,.14);padding:2px 10px;border-radius:20px}
+
+/* ===== Tools ===== */
+.tools{padding:10px 12px;display:grid;gap:8px;background:var(--bg);position:sticky;top:86px;z-index:10}
+.search{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.frow{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.frow::-webkit-scrollbar{display:none}
+.frow select{flex:1;min-width:110px;padding:8px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.chip{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 12px;cursor:pointer;font-size:13px}
+.chip.on{background:var(--amber);border-color:var(--amber);color:#fff}
+
+/* ===== List ===== */
+main{padding:4px 12px 100px;display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(310px,1fr))}
+.group-title{grid-column:1/-1;font-weight:800;color:var(--green);margin:8px 2px 0;font-size:14px;border-bottom:2px solid var(--soft);padding-bottom:4px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;gap:10px;padding:10px;cursor:pointer;border:1px solid transparent}
+.card:active{border-color:var(--green2)}
+.thumb{width:78px;height:78px;border-radius:10px;background:var(--soft);flex-shrink:0;object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:30px;color:var(--green2)}
+.cbody{flex:1;min-width:0}
+.cname{font-weight:700;font-size:15.5px;line-height:1.35}
+.cmeta{font-size:12.5px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{display:inline-block;font-size:11.5px;background:var(--soft);color:var(--green);padding:1px 8px;border-radius:20px;margin-top:3px;font-weight:600}
+.badge.warn{background:#fdf1dd;color:var(--amber)}
+.prices{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px}
+.price{background:#f7faf8;border-radius:8px;padding:3px 4px;text-align:center}
+.price small{display:block;font-size:10.5px;color:var(--muted)}
+.price b{font-size:13.5px}
+.price .m{font-size:10.5px;color:var(--green2);font-weight:600}
+.price .m.neg{color:var(--red)}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:50px 10px}
+
+.fab{position:fixed;bottom:max(18px,env(safe-area-inset-bottom));left:18px;background:var(--green);color:#fff;border:0;border-radius:30px;padding:13px 20px;font-weight:700;font-size:16px;box-shadow:0 4px 14px rgba(31,95,63,.35);cursor:pointer;z-index:15}
+
+/* ===== Modal ===== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:#fff;width:100%;max-width:640px;max-height:94vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:16px 16px max(16px,env(safe-area-inset-bottom))}
+@media(min-width:700px){.overlay{align-items:center}.sheet{border-radius:18px}}
+.sheet h2{margin:0 0 12px;font-size:18px;display:flex;align-items:center;gap:8px}
+.sheet h2 .x{margin-inline-start:auto;background:var(--soft);border:0;width:34px;height:34px;border-radius:10px;font-size:18px;cursor:pointer}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-weight:600}
+.inp{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.inp:focus{outline:2px solid var(--green2);border-color:transparent}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.checks{display:flex;flex-wrap:wrap;gap:6px}
+.checks label{margin:0;display:flex;align-items:center;gap:6px;border:1px solid var(--line);padding:6px 10px;border-radius:20px;color:var(--text);font-weight:400;cursor:pointer}
+.checks input{accent-color:var(--green)}
+.img-box{display:flex;gap:10px;align-items:center}
+.img-prev{width:96px;height:96px;border-radius:12px;background:var(--soft);object-fit:cover;display:flex;align-items:center;justify-content:center;font-size:34px;color:var(--green2)}
+.btn{border:0;border-radius:11px;padding:11px 16px;font-weight:700;cursor:pointer}
+.btn.pri{background:var(--green);color:#fff}
+.btn.sec{background:var(--soft);color:var(--green)}
+.btn.dan{background:#fdecea;color:var(--red)}
+.btn:disabled{opacity:.6}
+.actions{display:flex;gap:8px;margin-top:16px}
+.actions .pri{flex:1}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.margin-preview{font-size:12.5px;color:var(--green2);margin-top:6px;font-weight:600}
+
+/* detail */
+.big-img{width:100%;max-height:320px;object-fit:contain;border-radius:12px;background:var(--soft)}
+.drow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);gap:10px}
+.drow span:first-child{color:var(--muted)}
+.drow span:last-child{font-weight:600;text-align:left}
+
+/* login */
+.login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,var(--green),#123d28)}
+.login .box{background:#fff;border-radius:18px;padding:26px 20px;width:100%;max-width:360px;text-align:center}
+.login h1{margin:6px 0 4px;font-size:21px;color:var(--green)}
+
+/* toast + loader */
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:10px 18px;border-radius:24px;z-index:99;font-size:14px;max-width:90vw;text-align:center}
+.loader{position:fixed;inset:0;background:rgba(255,255,255,.6);z-index:98;display:flex;align-items:center;justify-content:center}
+.spin{width:42px;height:42px;border:4px solid var(--soft);border-top-color:var(--green);border-radius:50%;animation:s 0.8s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- ===== Login ===== -->
+<div id="loginView" class="login hidden">
+  <div class="box">
+    <div style="font-size:44px">🧪</div>
+    <h1>المركبات والأسمدة</h1>
+    <p style="color:var(--muted);margin:0 0 14px;font-size:14px">اكتب كود الدخول</p>
+    <input id="loginCode" class="inp" type="password" inputmode="numeric" placeholder="كود الدخول" style="text-align:center">
+    <button class="btn pri" style="width:100%;margin-top:12px" onclick="doLogin()">دخول</button>
+  </div>
+</div>
+
+<!-- ===== App ===== -->
+<div id="appView" class="hidden">
+  <header>
+    <div class="hrow">
+      <h1>🧪 المركبات والأسمدة</h1>
+      <button class="icon-btn" title="تحديث" onclick="loadAll()">⟳</button>
+      <button class="icon-btn" title="الإعدادات" onclick="openSettings()">⚙</button>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="tools">
+    <input id="q" class="search" type="search" placeholder="🔍 ابحث بالاسم أو المادة الفعالة أو الشركة" oninput="render()">
+    <div class="frow">
+      <select id="fCat" onchange="render()"></select>
+      <select id="fBranch" onchange="render()"></select>
+      <select id="fSort" onchange="render()">
+        <option value="name">ترتيب: الاسم</option>
+        <option value="ai">تجميع: المادة الفعالة</option>
+        <option value="cat">تجميع: التصنيف</option>
+        <option value="buyAsc">سعر الشراء ↑</option>
+        <option value="buyDesc">سعر الشراء ↓</option>
+        <option value="new">الأحدث</option>
+      </select>
+    </div>
+    <div class="frow">
+      <span class="chip" id="chipMissing" onclick="toggleMissing()">⚠ بيانات ناقصة</span>
+      <span class="chip" onclick="exportCSV()">⬇ تصدير Excel</span>
+    </div>
+  </div>
+
+  <main id="list"></main>
+  <button class="fab" onclick="openForm()">＋ مركب جديد</button>
+</div>
+
+<!-- ===== Modals ===== -->
+<div id="formModal" class="overlay hidden" onclick="if(event.target===this)closeModal('formModal')">
+  <div class="sheet">
+    <h2><span id="formTitle">مركب جديد</span><button class="x" onclick="closeModal('formModal')">✕</button></h2>
+
+    <label>صورة المركب</label>
+    <div class="img-box">
+      <div id="imgPrev" class="img-prev">📷</div>
+      <div style="display:grid;gap:6px">
+        <button class="btn sec" type="button" onclick="document.getElementById('imgFile').click()">اختار / صوّر</button>
+        <button class="btn dan hidden" id="btnRemoveImg" type="button" onclick="removeImage()">مسح الصورة</button>
+      </div>
+      <input id="imgFile" type="file" accept="image/*" class="hidden" onchange="pickImage(this)">
+    </div>
+
+    <label>اسم المركب *</label>
+    <input id="fName" class="inp" placeholder="مثال: أكتارا 25%">
+
+    <div class="grid2">
+      <div><label>التصنيف</label><select id="fCategory" class="inp"></select></div>
+      <div><label>العبوة</label><input id="fUnit" class="inp" placeholder="لتر / كيلو / 250 جم"></div>
+    </div>
+
+    <label>المادة الفعالة</label>
+    <input id="fAI" class="inp" list="aiList" placeholder="مثال: ثياميثوكسام 25%">
+    <datalist id="aiList"></datalist>
+
+    <label>الشركة</label>
+    <input id="fCompany" class="inp" list="coList" placeholder="اسم الشركة / المورد">
+    <datalist id="coList"></datalist>
+
+    <div class="grid3">
+      <div><label>سعر الشراء</label><input id="fBuy" class="inp" type="number" inputmode="decimal" oninput="marginPreview()"></div>
+      <div><label>سعر الجملة</label><input id="fWhole" class="inp" type="number" inputmode="decimal" oninput="marginPreview()"></div>
+      <div><label>سعر التجاري</label><input id="fRetail" class="inp" type="number" inputmode="decimal" oninput="marginPreview()"></div>
+    </div>
+    <div id="marginPrev" class="margin-preview"></div>
+
+    <label>الفروع</label>
+    <div id="fBranches" class="checks"></div>
+
+    <label>ملاحظات</label>
+    <textarea id="fNotes" class="inp" rows="2" placeholder="معدل الاستخدام، تحذيرات، ..."></textarea>
+
+    <div class="actions">
+      <button class="btn pri" id="btnSave" onclick="saveProduct()">حفظ</button>
+      <button class="btn dan hidden" id="btnDelete" onclick="askDelete()">حذف</button>
+    </div>
+  </div>
+</div>
+
+<div id="detailModal" class="overlay hidden" onclick="if(event.target===this)closeModal('detailModal')">
+  <div class="sheet">
+    <h2><span id="dTitle"></span><button class="x" onclick="closeModal('detailModal')">✕</button></h2>
+    <div id="dBody"></div>
+    <div class="actions"><button class="btn pri" id="dEdit">تعديل</button></div>
+  </div>
+</div>
+
+<div id="settingsModal" class="overlay hidden" onclick="if(event.target===this)closeModal('settingsModal')">
+  <div class="sheet">
+    <h2>الإعدادات<button class="x" onclick="closeModal('settingsModal')">✕</button></h2>
+    <label>التصنيفات (كل تصنيف في سطر)</label>
+    <textarea id="sCats" class="inp" rows="7"></textarea>
+    <label>الفروع (كل فرع في سطر)</label>
+    <textarea id="sBranches" class="inp" rows="4"></textarea>
+    <div class="actions">
+      <button class="btn pri" onclick="saveSettings()">حفظ الإعدادات</button>
+      <button class="btn dan" onclick="logout()">خروج</button>
+    </div>
+  </div>
+</div>
+
+<div id="confirmModal" class="overlay hidden">
+  <div class="sheet" style="text-align:center">
+    <p id="confirmText" style="font-size:16px;font-weight:600;margin:10px 0 0"></p>
+    <div class="actions">
+      <button class="btn dan" style="flex:1" id="confirmYes">أيوه احذف</button>
+      <button class="btn sec" style="flex:1" onclick="closeModal('confirmModal')">إلغاء</button>
+    </div>
+  </div>
+</div>
+
+<div id="loader" class="loader hidden"><div class="spin"></div></div>
+<div id="toast" class="toast hidden"></div>
+
+<script>
+/* ======= حط هنا رابط الـ Web App بتاع Apps Script ======= */
+const API_URL = 'https://script.google.com/macros/s/AKfycbxlXkRGroUHjtBXplaxacVd-NTBwGy1yGI8jPg-SRzdeiS5WJKaC5bgHJ8nQnCCaBaK/exec';
+
+let PRODUCTS = [], SETTINGS = {categories:[], branches:[]};
+let editing = null, pendingImage = null, removeImg = false, onlyMissing = false;
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k){ try{return localStorage.getItem(k)}catch(e){return null} },
+  set(k,v){ try{localStorage.setItem(k,v)}catch(e){} },
+  del(k){ try{localStorage.removeItem(k)}catch(e){} }
+};
+
+/* ---------- API ---------- */
+async function api(action, data={}){
+  const res = await fetch(API_URL, {method:'POST', body: JSON.stringify({action, code: store.get('pc_code'), ...data})});
+  const j = await res.json();
+  if(!j.ok) throw new Error(j.error || 'حصل خطأ');
+  return j;
+}
+function loading(on){ $('loader').classList.toggle('hidden', !on) }
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.classList.remove('hidden'); clearTimeout(t._t); t._t=setTimeout(()=>t.classList.add('hidden'),2600) }
+
+/* ---------- Login ---------- */
+async function doLogin(){
+  const c = $('loginCode').value.trim();
+  if(!c) return;
+  store.set('pc_code', c);
+  loading(true);
+  try{ await loadAll(true); showApp(); }
+  catch(e){ store.del('pc_code'); toast(e.message); }
+  finally{ loading(false); }
+}
+function logout(){ store.del('pc_code'); location.reload(); }
+function showApp(){ $('loginView').classList.add('hidden'); $('appView').classList.remove('hidden'); }
+
+/* ---------- Load ---------- */
+async function loadAll(silentThrow){
+  if(!silentThrow) loading(true);
+  try{
+    const j = await api('list');
+    PRODUCTS = j.products; SETTINGS = j.settings;
+    store.set('pc_cache', JSON.stringify({PRODUCTS, SETTINGS}));
+    fillFilters(); render();
+  }catch(e){ if(silentThrow) throw e; toast(e.message); }
+  finally{ if(!silentThrow) loading(false); }
+}
+
+function fillFilters(){
+  const keepC=$('fCat').value, keepB=$('fBranch').value;
+  const cats = uniq([...SETTINGS.categories, ...PRODUCTS.map(p=>p.category)]);
+  $('fCat').innerHTML = '<option value="">كل التصنيفات</option>' + cats.map(c=>`<option>${esc(c)}</option>`).join('');
+  $('fBranch').innerHTML = '<option value="">كل الفروع</option>' + SETTINGS.branches.map(b=>`<option>${esc(b)}</option>`).join('');
+  $('fCat').value = keepC; $('fBranch').value = keepB;
+  $('aiList').innerHTML = uniq(PRODUCTS.map(p=>p.activeIngredient)).map(x=>`<option value="${esc(x)}">`).join('');
+  $('coList').innerHTML = uniq(PRODUCTS.map(p=>p.company)).map(x=>`<option value="${esc(x)}">`).join('');
+}
+
+/* ---------- Helpers ---------- */
+function uniq(a){ return [...new Set(a.map(x=>String(x||'').trim()).filter(Boolean))].sort((x,y)=>x.localeCompare(y,'ar')) }
+function esc(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
+function num(v){ return (v===''||v===null||v===undefined||isNaN(v)) ? null : Number(v) }
+function money(v){ const n=num(v); return n===null ? '—' : n.toLocaleString('en-US',{maximumFractionDigits:2}) }
+function marginTxt(sell,buy){
+  const s=num(sell), b=num(buy);
+  if(s===null||b===null||b===0) return '';
+  const d=s-b, pct=Math.round(d/b*100);
+  return `<div class="m ${d<0?'neg':''}">${d>=0?'+':''}${money(d)} (${pct}%)</div>`;
+}
+function missingList(p){
+  const m=[];
+  if(!p.category) m.push('التصنيف');
+  if(!p.activeIngredient) m.push('المادة الفعالة');
+  if(num(p.purchasePrice)===null) m.push('سعر الشراء');
+  if(num(p.wholesalePrice)===null) m.push('سعر الجملة');
+  if(num(p.retailPrice)===null) m.push('سعر التجاري');
+  if(!p.imageUrl) m.push('الصورة');
+  return m;
+}
+function norm(s){ return String(s||'').toLowerCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي') }
+
+/* ---------- Render ---------- */
+function toggleMissing(){ onlyMissing=!onlyMissing; $('chipMissing').classList.toggle('on',onlyMissing); render(); }
+
+function render(){
+  const q=norm($('q').value), cat=$('fCat').value, br=$('fBranch').value, sort=$('fSort').value;
+  let arr = PRODUCTS.filter(p=>{
+    if(cat && p.category!==cat) return false;
+    if(br && !(p.branches||[]).includes(br)) return false;
+    if(onlyMissing && !missingList(p).length) return false;
+    if(q && !norm([p.name,p.activeIngredient,p.company,p.notes].join(' ')).includes(q)) return false;
+    return true;
+  });
+
+  const byName=(a,b)=>String(a.name).localeCompare(String(b.name),'ar');
+  const groupKey = sort==='ai' ? 'activeIngredient' : sort==='cat' ? 'category' : null;
+  if(sort==='buyAsc') arr.sort((a,b)=>(num(a.purchasePrice)??1e12)-(num(b.purchasePrice)??1e12));
+  else if(sort==='buyDesc') arr.sort((a,b)=>(num(b.purchasePrice)??-1)-(num(a.purchasePrice)??-1));
+  else if(sort==='new') arr.sort((a,b)=>String(b.updatedAt).localeCompare(String(a.updatedAt)));
+  else if(groupKey) arr.sort((a,b)=>String(a[groupKey]||'ي').localeCompare(String(b[groupKey]||'ي'),'ar') || (num(a.purchasePrice)??1e12)-(num(b.purchasePrice)??1e12));
+  else arr.sort(byName);
+
+  const missingCount = PRODUCTS.filter(p=>missingList(p).length).length;
+  $('stats').innerHTML = `<span>${PRODUCTS.length} مركب</span><span>${uniq(PRODUCTS.map(p=>p.activeIngredient)).length} مادة فعالة</span><span>⚠ ${missingCount} ناقص بيانات</span>${arr.length!==PRODUCTS.length?`<span>المعروض: ${arr.length}</span>`:''}`;
+
+  if(!arr.length){ $('list').innerHTML = `<div class="empty">${PRODUCTS.length?'مفيش نتايج للبحث ده':'لسه مفيش مركبات — دوس "＋ مركب جديد"'}</div>`; return; }
+
+  let html='', last=null;
+  arr.forEach(p=>{
+    if(groupKey){
+      const g = p[groupKey] || 'غير محدد';
+      if(g!==last){ const cnt=arr.filter(x=>(x[groupKey]||'غير محدد')===g).length; html+=`<div class="group-title">${esc(g)} <span style="color:var(--muted);font-weight:600">(${cnt})</span></div>`; last=g; }
+    }
+    html += cardHTML(p);
+  });
+  $('list').innerHTML = html;
+}
+
+function cardHTML(p){
+  const miss = missingList(p);
+  const img = p.imageUrl ? `<img class="thumb" loading="lazy" src="${esc(p.imageUrl)}" onerror="this.outerHTML='<div class=thumb>🧪</div>'">` : `<div class="thumb">🧪</div>`;
+  return `<div class="card" onclick="openDetail('${esc(p.id)}')">
+    ${img}
+    <div class="cbody">
+      <div class="cname">${esc(p.name)}</div>
+      <div class="cmeta">${esc(p.activeIngredient||'— مادة فعالة غير مسجلة')}</div>
+      <div class="cmeta">${esc([p.company,p.unit].filter(Boolean).join(' • '))}</div>
+      ${p.category?`<span class="badge">${esc(p.category)}</span> `:''}${miss.length?`<span class="badge warn">ناقص ${miss.length}</span>`:''}
+      <div class="prices">
+        <div class="price"><small>شراء</small><b>${money(p.purchasePrice)}</b></div>
+        <div class="price"><small>جملة</small><b>${money(p.wholesalePrice)}</b>${marginTxt(p.wholesalePrice,p.purchasePrice)}</div>
+        <div class="price"><small>تجاري</small><b>${money(p.retailPrice)}</b>${marginTxt(p.retailPrice,p.purchasePrice)}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- Detail ---------- */
+function openDetail(id){
+  const p = PRODUCTS.find(x=>x.id===id); if(!p) return;
+  $('dTitle').textContent = p.name;
+  const miss = missingList(p);
+  const row=(k,v)=>`<div class="drow"><span>${k}</span><span>${v}</span></div>`;
+  const pr=(sell)=>{ const m=marginTxt(sell,p.purchasePrice).replace(/<[^>]+>/g,''); return money(sell)+(m?` <small style="color:var(--green2)">${m}</small>`:''); };
+  $('dBody').innerHTML =
+    (p.imageUrl?`<img class="big-img" src="${esc(p.imageUrl)}">`:'') +
+    row('التصنيف', esc(p.category||'—')) +
+    row('المادة الفعالة', esc(p.activeIngredient||'—')) +
+    row('الشركة', esc(p.company||'—')) +
+    row('العبوة', esc(p.unit||'—')) +
+    row('سعر الشراء', money(p.purchasePrice)) +
+    row('سعر الجملة', pr(p.wholesalePrice)) +
+    row('سعر البيع التجاري', pr(p.retailPrice)) +
+    row('الفروع', esc((p.branches||[]).join('، ')||'—')) +
+    (p.notes?row('ملاحظات', esc(p.notes)):'') +
+    (miss.length?`<p class="hint" style="color:var(--amber)">⚠ ناقص: ${miss.join('، ')}</p>`:'');
+  const others = PRODUCTS.filter(x=>x.id!==p.id && p.activeIngredient && norm(x.activeIngredient)===norm(p.activeIngredient));
+  if(others.length){
+    $('dBody').innerHTML += `<label style="margin-top:14px">مركبات تانية بنفس المادة الفعالة</label>` +
+      others.map(o=>row(esc(o.name)+(o.company?` <small style="color:var(--muted)">${esc(o.company)}</small>`:''), 'شراء '+money(o.purchasePrice))).join('');
+  }
+  $('dEdit').onclick = ()=>{ closeModal('detailModal'); openForm(p); };
+  $('detailModal').classList.remove('hidden');
+}
+
+/* ---------- Form ---------- */
+function openForm(p){
+  editing = p || null; pendingImage=null; removeImg=false;
+  $('formTitle').textContent = p ? 'تعديل مركب' : 'مركب جديد';
+  $('fName').value = p?.name||'';
+  const cats = uniq([...SETTINGS.categories, p?.category||'']);
+  $('fCategory').innerHTML = '<option value="">— اختار —</option>' + cats.map(c=>`<option>${esc(c)}</option>`).join('');
+  $('fCategory').value = p?.category||'';
+  $('fUnit').value = p?.unit||'';
+  $('fAI').value = p?.activeIngredient||'';
+  $('fCompany').value = p?.company||'';
+  $('fBuy').value = p?.purchasePrice ?? '';
+  $('fWhole').value = p?.wholesalePrice ?? '';
+  $('fRetail').value = p?.retailPrice ?? '';
+  $('fNotes').value = p?.notes||'';
+  const chosen = p?.branches || [];
+  const allBr = uniq([...SETTINGS.branches, ...chosen]);
+  $('fBranches').innerHTML = allBr.map(b=>`<label><input type="checkbox" value="${esc(b)}" ${chosen.includes(b)?'checked':''}>${esc(b)}</label>`).join('') || '<span class="hint">ضيف الفروع من الإعدادات ⚙</span>';
+  setPreview(p?.imageUrl||'');
+  $('btnDelete').classList.toggle('hidden', !p);
+  marginPreview();
+  $('formModal').classList.remove('hidden');
+}
+
+function setPreview(src){
+  $('imgPrev').outerHTML = src ? `<img id="imgPrev" class="img-prev" src="${esc(src)}">` : `<div id="imgPrev" class="img-prev">📷</div>`;
+  $('btnRemoveImg').classList.toggle('hidden', !src);
+}
+
+function marginPreview(){
+  const b=num($('fBuy').value===''?null:$('fBuy').value), w=num($('fWhole').value===''?null:$('fWhole').value), r=num($('fRetail').value===''?null:$('fRetail').value);
+  const part=(label,s)=> (b && s!==null) ? `${label}: ${s-b>=0?'+':''}${money(s-b)} (${Math.round((s-b)/b*100)}%)` : '';
+  $('marginPrev').textContent = [part('ربح الجملة',w), part('ربح التجاري',r)].filter(Boolean).join('   •   ');
+}
+
+function pickImage(input){
+  const file = input.files[0]; input.value='';
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const max=1000, scale=Math.min(1, max/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');
+      c.width=Math.round(img.width*scale); c.height=Math.round(img.height*scale);
+      const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height);
+      ctx.drawImage(img,0,0,c.width,c.height);
+      const data=c.toDataURL('image/jpeg',0.82);
+      pendingImage={data, mime:'image/jpeg'}; removeImg=false;
+      setPreview(data);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function removeImage(){ pendingImage=null; removeImg=true; setPreview(''); }
+
+async function saveProduct(){
+  const name=$('fName').value.trim();
+  if(!name) return toast('اكتب اسم المركب');
+  const product = {
+    id: editing?.id || '',
+    name, category:$('fCategory').value, unit:$('fUnit').value,
+    activeIngredient:$('fAI').value, company:$('fCompany').value,
+    purchasePrice:$('fBuy').value, wholesalePrice:$('fWhole').value, retailPrice:$('fRetail').value,
+    branches:[...$('fBranches').querySelectorAll('input:checked')].map(i=>i.value),
+    notes:$('fNotes').value, removeImage: removeImg
+  };
+  $('btnSave').disabled=true; loading(true);
+  try{
+    const j = await api('save', {product, image: pendingImage});
+    const i = PRODUCTS.findIndex(x=>x.id===j.product.id);
+    if(i>=0) PRODUCTS[i]=j.product; else PRODUCTS.push(j.product);
+    closeModal('formModal'); fillFilters(); render(); toast('اتحفظ ✅');
+  }catch(e){ toast(e.message); }
+  finally{ $('btnSave').disabled=false; loading(false); }
+}
+
+function askDelete(){
+  $('confirmText').textContent = `تحذف "${editing.name}"؟`;
+  $('confirmYes').onclick = async ()=>{
+    closeModal('confirmModal'); loading(true);
+    try{ await api('delete',{id:editing.id}); PRODUCTS=PRODUCTS.filter(x=>x.id!==editing.id); closeModal('formModal'); fillFilters(); render(); toast('اتحذف'); }
+    catch(e){ toast(e.message); } finally{ loading(false); }
+  };
+  $('confirmModal').classList.remove('hidden');
+}
+
+/* ---------- Settings ---------- */
+function openSettings(){
+  $('sCats').value = SETTINGS.categories.join('\n');
+  $('sBranches').value = SETTINGS.branches.join('\n');
+  $('settingsModal').classList.remove('hidden');
+}
+async function saveSettings(){
+  const settings = {
+    categories: $('sCats').value.split('\n').map(s=>s.trim()).filter(Boolean),
+    branches: $('sBranches').value.split('\n').map(s=>s.trim()).filter(Boolean)
+  };
+  loading(true);
+  try{ const j=await api('saveSettings',{settings}); SETTINGS=j.settings; fillFilters(); render(); closeModal('settingsModal'); toast('اتحفظت الإعدادات ✅'); }
+  catch(e){ toast(e.message); } finally{ loading(false); }
+}
+
+function closeModal(id){ $(id).classList.add('hidden'); }
+
+/* ---------- Export ---------- */
+function exportCSV(){
+  const head=['اسم المركب','التصنيف','المادة الفعالة','الشركة','العبوة','سعر الشراء','سعر الجملة','سعر البيع التجاري','الفروع','ملاحظات','رابط الصورة'];
+  const rows = PRODUCTS.map(p=>[p.name,p.category,p.activeIngredient,p.company,p.unit,p.purchasePrice,p.wholesalePrice,p.retailPrice,(p.branches||[]).join('، '),p.notes,p.imageUrl]);
+  const csv = '﻿'+[head,...rows].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='المركبات_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
+/* ---------- Start ---------- */
+(function init(){
+  $('loginCode').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+  if(!store.get('pc_code')){ $('loginView').classList.remove('hidden'); return; }
+  const cache = store.get('pc_cache');
+  if(cache){ try{ const c=JSON.parse(cache); PRODUCTS=c.PRODUCTS; SETTINGS=c.SETTINGS; }catch(e){} }
+  showApp(); fillFilters(); render(); loadAll();
+})();
+</script>
+</body>
+</html>
