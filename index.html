@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1f5f3f">
 <title>المركبات والأسمدة</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="المركبات">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -27,11 +34,18 @@ header{position:sticky;top:0;z-index:20;background:var(--green);color:#fff;paddi
 .stats span{background:rgba(255,255,255,.14);padding:2px 10px;border-radius:20px}
 
 /* ===== Tools ===== */
-.tools{padding:10px 12px;display:grid;gap:8px;background:var(--bg);position:sticky;top:86px;z-index:10}
+.tools{padding:10px 12px;display:grid;gap:8px;background:var(--bg);position:sticky;top:86px;z-index:10;box-shadow:0 4px 8px -6px rgba(0,0,0,.12)}
 .search{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}
 .frow{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .frow::-webkit-scrollbar{display:none}
 .frow select{flex:1;min-width:110px;padding:8px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0}
+.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:22px;padding:7px 14px;cursor:pointer;font-weight:600;font-size:13.5px;color:var(--text);flex-shrink:0}
+.tab .n{font-size:11.5px;color:var(--muted);margin-inline-start:4px;font-weight:600}
+.tab.on{background:var(--green);border-color:var(--green);color:#fff}
+.tab.on .n{color:#d6efe1}
+.tab.add{color:var(--green);border-style:dashed}
 .chip{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 12px;cursor:pointer;font-size:13px}
 .chip.on{background:var(--amber);border-color:var(--amber);color:#fff}
 
@@ -126,8 +140,8 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-wei
 
   <div class="tools">
     <input id="q" class="search" type="search" placeholder="🔍 ابحث بالاسم أو المادة الفعالة أو الشركة" oninput="render()">
+    <div class="tabs" id="catTabs"></div>
     <div class="frow">
-      <select id="fCat" onchange="render()"></select>
       <select id="fSort" onchange="render()">
         <option value="name">ترتيب: الاسم</option>
         <option value="ai">تجميع: المادة الفعالة</option>
@@ -166,7 +180,8 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-wei
     <input id="fName" class="inp" placeholder="مثال: أكتارا 25%">
 
     <div class="grid2">
-      <div><label>التصنيف</label><select id="fCategory" class="inp"></select></div>
+      <div><label>التصنيف</label><select id="fCategory" class="inp" onchange="catChanged()"></select>
+        <input id="fNewCat" class="inp hidden" style="margin-top:6px" placeholder="اسم التصنيف الجديد"></div>
       <div><label>العبوة</label><input id="fUnit" class="inp" placeholder="لتر / كيلو / 250 جم"></div>
     </div>
 
@@ -216,6 +231,14 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-wei
   </div>
 </div>
 
+<div id="catModal" class="overlay hidden" onclick="if(event.target===this)closeModal('catModal')">
+  <div class="sheet">
+    <h2>تصنيف جديد<button class="x" onclick="closeModal('catModal')">✕</button></h2>
+    <input id="newCatName" class="inp" placeholder="مثال: مبيد بكتيري">
+    <div class="actions"><button class="btn pri" onclick="addCategory()">إضافة</button></div>
+  </div>
+</div>
+
 <div id="confirmModal" class="overlay hidden">
   <div class="sheet" style="text-align:center">
     <p id="confirmText" style="font-size:16px;font-weight:600;margin:10px 0 0"></p>
@@ -234,7 +257,7 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-wei
 const API_URL = 'https://script.google.com/macros/s/AKfycbxlXkRGroUHjtBXplaxacVd-NTBwGy1yGI8jPg-SRzdeiS5WJKaC5bgHJ8nQnCCaBaK/exec';
 
 let PRODUCTS = [], SETTINGS = {categories:[], branches:[]};
-let editing = null, pendingImage = null, removeImg = false, onlyMissing = false;
+let editing = null, pendingImage = null, removeImg = false, onlyMissing = false, currentCat = '';
 
 const $ = id => document.getElementById(id);
 const store = {
@@ -279,10 +302,7 @@ async function loadAll(silentThrow){
 }
 
 function fillFilters(){
-  const keepC=$('fCat').value;
-  const cats = uniq([...SETTINGS.categories, ...PRODUCTS.map(p=>p.category)]);
-  $('fCat').innerHTML = '<option value="">كل التصنيفات</option>' + cats.map(c=>`<option>${esc(c)}</option>`).join('');
-  $('fCat').value = keepC;
+  renderTabs();
   $('aiList').innerHTML = uniq(PRODUCTS.map(p=>p.activeIngredient)).map(x=>`<option value="${esc(x)}">`).join('');
   $('coList').innerHTML = uniq(PRODUCTS.map(p=>p.company)).map(x=>`<option value="${esc(x)}">`).join('');
 }
@@ -310,13 +330,48 @@ function missingList(p){
 }
 function norm(s){ return String(s||'').toLowerCase().replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي') }
 
+/* ---------- Category tabs ---------- */
+function allCats(){
+  const extra = PRODUCTS.map(p=>p.category).filter(c=>c && !SETTINGS.categories.includes(c));
+  return [...SETTINGS.categories, ...uniq(extra)];
+}
+function renderTabs(){
+  const cats = allCats();
+  if(currentCat && !cats.includes(currentCat)) currentCat='';
+  const cnt = c => PRODUCTS.filter(p=>p.category===c).length;
+  let h = `<button class="tab ${currentCat===''?'on':''}" onclick="setCat('')">الكل<span class="n">${PRODUCTS.length}</span></button>`;
+  h += cats.map((c,i)=>`<button class="tab ${currentCat===c?'on':''}" data-i="${i}" onclick="setCat(allCats()[${i}])">${esc(c)}<span class="n">${cnt(c)}</span></button>`).join('');
+  const none = PRODUCTS.filter(p=>!p.category).length;
+  if(none) h += `<button class="tab ${currentCat==='__none'?'on':''}" onclick="setCat('__none')">بدون تصنيف<span class="n">${none}</span></button>`;
+  h += `<button class="tab add" onclick="openCatModal()">＋ تصنيف</button>`;
+  $('catTabs').innerHTML = h;
+  const on = $('catTabs').querySelector('.tab.on'); if(on) on.scrollIntoView({inline:'center',block:'nearest'});
+}
+function setCat(c){ currentCat=c; renderTabs(); render(); window.scrollTo({top:0}); }
+function openCatModal(){ $('newCatName').value=''; $('catModal').classList.remove('hidden'); setTimeout(()=>$('newCatName').focus(),50); }
+async function addCategory(){
+  const name = $('newCatName').value.trim();
+  if(!name) return toast('اكتب اسم التصنيف');
+  if(SETTINGS.categories.includes(name)) return toast('التصنيف ده موجود');
+  loading(true);
+  try{
+    const j = await api('saveSettings',{settings:{categories:[...SETTINGS.categories,name], branches:SETTINGS.branches||[]}});
+    SETTINGS=j.settings; closeModal('catModal'); currentCat=name; renderTabs(); render(); toast('اتضاف التصنيف ✅');
+  }catch(e){ toast(e.message); } finally{ loading(false); }
+}
+function catChanged(){
+  const isNew = $('fCategory').value==='__new';
+  $('fNewCat').classList.toggle('hidden', !isNew);
+  if(isNew) $('fNewCat').focus();
+}
+
 /* ---------- Render ---------- */
 function toggleMissing(){ onlyMissing=!onlyMissing; $('chipMissing').classList.toggle('on',onlyMissing); render(); }
 
 function render(){
-  const q=norm($('q').value), cat=$('fCat').value, sort=$('fSort').value;
+  const q=norm($('q').value), cat=currentCat, sort=$('fSort').value;
   let arr = PRODUCTS.filter(p=>{
-    if(cat && p.category!==cat) return false;
+    if(cat==='__none'){ if(p.category) return false; } else if(cat && p.category!==cat) return false;
     if(onlyMissing && !missingList(p).length) return false;
     if(q && !norm([p.name,p.activeIngredient,p.company,p.notes].join(' ')).includes(q)) return false;
     return true;
@@ -397,9 +452,10 @@ function openForm(p){
   editing = p || null; pendingImage=null; removeImg=false;
   $('formTitle').textContent = p ? 'تعديل مركب' : 'مركب جديد';
   $('fName').value = p?.name||'';
-  const cats = uniq([...SETTINGS.categories, p?.category||'']);
-  $('fCategory').innerHTML = '<option value="">— اختار —</option>' + cats.map(c=>`<option>${esc(c)}</option>`).join('');
-  $('fCategory').value = p?.category||'';
+  const cats = [...allCats(), ...(p?.category && !allCats().includes(p.category) ? [p.category] : [])];
+  $('fCategory').innerHTML = '<option value="">— اختار —</option>' + cats.map(c=>`<option>${esc(c)}</option>`).join('') + '<option value="__new">＋ تصنيف جديد...</option>';
+  $('fCategory').value = p?.category || (!p && currentCat && currentCat!=='__none' ? currentCat : '');
+  $('fNewCat').value=''; $('fNewCat').classList.add('hidden');
   $('fUnit').value = p?.unit||'';
   $('fAI').value = p?.activeIngredient||'';
   $('fCompany').value = p?.company||'';
@@ -449,9 +505,14 @@ function removeImage(){ pendingImage=null; removeImg=true; setPreview(''); }
 async function saveProduct(){
   const name=$('fName').value.trim();
   if(!name) return toast('اكتب اسم المركب');
+  let category = $('fCategory').value;
+  if(category==='__new'){
+    category = $('fNewCat').value.trim();
+    if(!category) return toast('اكتب اسم التصنيف الجديد');
+  }
   const product = {
     id: editing?.id || '',
-    name, category:$('fCategory').value, unit:$('fUnit').value,
+    name, category, unit:$('fUnit').value,
     activeIngredient:$('fAI').value, company:$('fCompany').value,
     purchasePrice:$('fBuy').value, wholesalePrice:$('fWhole').value, retailPrice:$('fRetail').value,
     branches: editing?.branches || [],
@@ -459,6 +520,10 @@ async function saveProduct(){
   };
   $('btnSave').disabled=true; loading(true);
   try{
+    if(category && !SETTINGS.categories.includes(category)){
+      const js = await api('saveSettings',{settings:{categories:[...SETTINGS.categories,category], branches:SETTINGS.branches||[]}});
+      SETTINGS = js.settings;
+    }
     const j = await api('save', {product, image: pendingImage});
     const i = PRODUCTS.findIndex(x=>x.id===j.product.id);
     if(i>=0) PRODUCTS[i]=j.product; else PRODUCTS.push(j.product);
@@ -508,6 +573,7 @@ function exportCSV(){
 /* ---------- Start ---------- */
 (function init(){
   $('loginCode').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+  $('newCatName').addEventListener('keydown',e=>{ if(e.key==='Enter') addCategory(); });
   if(!store.get('pc_code')){ $('loginView').classList.remove('hidden'); return; }
   const cache = store.get('pc_cache');
   if(cache){ try{ const c=JSON.parse(cache); PRODUCTS=c.PRODUCTS; SETTINGS=c.SETTINGS; }catch(e){} }
