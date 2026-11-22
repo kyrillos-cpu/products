@@ -428,7 +428,7 @@ function render(){
   $('stats').innerHTML = `<span>${PRODUCTS.length} مركب</span><span>${uniq(PRODUCTS.map(p=>p.activeIngredient)).length} مادة فعالة</span><span>⚠ ${missingCount} ناقص بيانات</span>${arr.length!==PRODUCTS.length?`<span>المعروض: ${arr.length}</span>`:''}`;
 
   if(isHome && !q){ $('list').innerHTML = homeHTML(); return; }
-  if(!arr.length){ $('list').innerHTML = `<div class="empty">${PRODUCTS.length?'مفيش نتايج للبحث ده':'لسه مفيش مركبات — دوس "＋ مركب جديد"'}</div>`; return; }
+  if(!arr.length){ $('list').innerHTML = `<div class="empty">${q?'مفيش نتايج للبحث ده':'مفيش مركبات هنا لسه — دوس "＋ مركب جديد"'}</div>`; return; }
 
   let html='', last=null;
   arr.forEach(p=>{
