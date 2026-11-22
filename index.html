@@ -128,7 +128,6 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-wei
     <input id="q" class="search" type="search" placeholder="🔍 ابحث بالاسم أو المادة الفعالة أو الشركة" oninput="render()">
     <div class="frow">
       <select id="fCat" onchange="render()"></select>
-      <select id="fBranch" onchange="render()"></select>
       <select id="fSort" onchange="render()">
         <option value="name">ترتيب: الاسم</option>
         <option value="ai">تجميع: المادة الفعالة</option>
@@ -186,8 +185,6 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-wei
     </div>
     <div id="marginPrev" class="margin-preview"></div>
 
-    <label>الفروع</label>
-    <div id="fBranches" class="checks"></div>
 
     <label>ملاحظات</label>
     <textarea id="fNotes" class="inp" rows="2" placeholder="معدل الاستخدام، تحذيرات، ..."></textarea>
@@ -212,8 +209,6 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-wei
     <h2>الإعدادات<button class="x" onclick="closeModal('settingsModal')">✕</button></h2>
     <label>التصنيفات (كل تصنيف في سطر)</label>
     <textarea id="sCats" class="inp" rows="7"></textarea>
-    <label>الفروع (كل فرع في سطر)</label>
-    <textarea id="sBranches" class="inp" rows="4"></textarea>
     <div class="actions">
       <button class="btn pri" onclick="saveSettings()">حفظ الإعدادات</button>
       <button class="btn dan" onclick="logout()">خروج</button>
@@ -284,11 +279,10 @@ async function loadAll(silentThrow){
 }
 
 function fillFilters(){
-  const keepC=$('fCat').value, keepB=$('fBranch').value;
+  const keepC=$('fCat').value;
   const cats = uniq([...SETTINGS.categories, ...PRODUCTS.map(p=>p.category)]);
   $('fCat').innerHTML = '<option value="">كل التصنيفات</option>' + cats.map(c=>`<option>${esc(c)}</option>`).join('');
-  $('fBranch').innerHTML = '<option value="">كل الفروع</option>' + SETTINGS.branches.map(b=>`<option>${esc(b)}</option>`).join('');
-  $('fCat').value = keepC; $('fBranch').value = keepB;
+  $('fCat').value = keepC;
   $('aiList').innerHTML = uniq(PRODUCTS.map(p=>p.activeIngredient)).map(x=>`<option value="${esc(x)}">`).join('');
   $('coList').innerHTML = uniq(PRODUCTS.map(p=>p.company)).map(x=>`<option value="${esc(x)}">`).join('');
 }
@@ -320,10 +314,9 @@ function norm(s){ return String(s||'').toLowerCase().replace(/[أإآ]/g,'ا').r
 function toggleMissing(){ onlyMissing=!onlyMissing; $('chipMissing').classList.toggle('on',onlyMissing); render(); }
 
 function render(){
-  const q=norm($('q').value), cat=$('fCat').value, br=$('fBranch').value, sort=$('fSort').value;
+  const q=norm($('q').value), cat=$('fCat').value, sort=$('fSort').value;
   let arr = PRODUCTS.filter(p=>{
     if(cat && p.category!==cat) return false;
-    if(br && !(p.branches||[]).includes(br)) return false;
     if(onlyMissing && !missingList(p).length) return false;
     if(q && !norm([p.name,p.activeIngredient,p.company,p.notes].join(' ')).includes(q)) return false;
     return true;
@@ -388,7 +381,6 @@ function openDetail(id){
     row('سعر الشراء', money(p.purchasePrice)) +
     row('سعر الجملة', pr(p.wholesalePrice)) +
     row('سعر البيع التجاري', pr(p.retailPrice)) +
-    row('الفروع', esc((p.branches||[]).join('، ')||'—')) +
     (p.notes?row('ملاحظات', esc(p.notes)):'') +
     (miss.length?`<p class="hint" style="color:var(--amber)">⚠ ناقص: ${miss.join('، ')}</p>`:'');
   const others = PRODUCTS.filter(x=>x.id!==p.id && p.activeIngredient && norm(x.activeIngredient)===norm(p.activeIngredient));
@@ -415,9 +407,6 @@ function openForm(p){
   $('fWhole').value = p?.wholesalePrice ?? '';
   $('fRetail').value = p?.retailPrice ?? '';
   $('fNotes').value = p?.notes||'';
-  const chosen = p?.branches || [];
-  const allBr = uniq([...SETTINGS.branches, ...chosen]);
-  $('fBranches').innerHTML = allBr.map(b=>`<label><input type="checkbox" value="${esc(b)}" ${chosen.includes(b)?'checked':''}>${esc(b)}</label>`).join('') || '<span class="hint">ضيف الفروع من الإعدادات ⚙</span>';
   setPreview(p?.imageUrl||'');
   $('btnDelete').classList.toggle('hidden', !p);
   marginPreview();
@@ -465,7 +454,7 @@ async function saveProduct(){
     name, category:$('fCategory').value, unit:$('fUnit').value,
     activeIngredient:$('fAI').value, company:$('fCompany').value,
     purchasePrice:$('fBuy').value, wholesalePrice:$('fWhole').value, retailPrice:$('fRetail').value,
-    branches:[...$('fBranches').querySelectorAll('input:checked')].map(i=>i.value),
+    branches: editing?.branches || [],
     notes:$('fNotes').value, removeImage: removeImg
   };
   $('btnSave').disabled=true; loading(true);
@@ -491,13 +480,12 @@ function askDelete(){
 /* ---------- Settings ---------- */
 function openSettings(){
   $('sCats').value = SETTINGS.categories.join('\n');
-  $('sBranches').value = SETTINGS.branches.join('\n');
   $('settingsModal').classList.remove('hidden');
 }
 async function saveSettings(){
   const settings = {
     categories: $('sCats').value.split('\n').map(s=>s.trim()).filter(Boolean),
-    branches: $('sBranches').value.split('\n').map(s=>s.trim()).filter(Boolean)
+    branches: SETTINGS.branches || []
   };
   loading(true);
   try{ const j=await api('saveSettings',{settings}); SETTINGS=j.settings; fillFilters(); render(); closeModal('settingsModal'); toast('اتحفظت الإعدادات ✅'); }
@@ -508,8 +496,8 @@ function closeModal(id){ $(id).classList.add('hidden'); }
 
 /* ---------- Export ---------- */
 function exportCSV(){
-  const head=['اسم المركب','التصنيف','المادة الفعالة','الشركة','العبوة','سعر الشراء','سعر الجملة','سعر البيع التجاري','الفروع','ملاحظات','رابط الصورة'];
-  const rows = PRODUCTS.map(p=>[p.name,p.category,p.activeIngredient,p.company,p.unit,p.purchasePrice,p.wholesalePrice,p.retailPrice,(p.branches||[]).join('، '),p.notes,p.imageUrl]);
+  const head=['اسم المركب','التصنيف','المادة الفعالة','الشركة','العبوة','سعر الشراء','سعر الجملة','سعر البيع التجاري','ملاحظات','رابط الصورة'];
+  const rows = PRODUCTS.map(p=>[p.name,p.category,p.activeIngredient,p.company,p.unit,p.purchasePrice,p.wholesalePrice,p.retailPrice,p.notes,p.imageUrl]);
   const csv = '﻿'+[head,...rows].map(r=>r.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
