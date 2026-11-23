@@ -305,7 +305,7 @@ async function doLogin(){
   finally{ loading(false); }
 }
 function logout(){ store.del('pc_code'); location.reload(); }
-function showApp(){ $('loginView').classList.add('hidden'); $('appView').classList.remove('hidden'); }
+function showApp(){ $('loginView').classList.add('hidden'); $('appView').classList.remove('hidden'); if(!(history.state && history.state.guard)) armBack(); }
 
 /* ---------- Load ---------- */
 async function loadAll(silentThrow){
@@ -360,15 +360,23 @@ function catLabel(c){ return c==='' ? 'كل المركبات' : c==='__none' ? '
 function setCat(c){
   currentCat=c; view='cat'; onlyMissing=false; $('chipMissing').classList.remove('on');
   $('q').value='';
-  try{ history.pushState({v:'cat'},''); }catch(e){}
   render(); window.scrollTo({top:0});
 }
 function goHome(fromPop){
   view='home'; currentCat=''; $('q').value='';
-  if(!fromPop){ try{ if(history.state && history.state.v==='cat') history.back(); }catch(e){} }
   render(); window.scrollTo({top:0});
 }
-window.addEventListener('popstate',()=>{ if(view==='cat') goHome(true); });
+/* زرار الرجوع في الموبايل: يقفل النافذة المفتوحة، أو يرجع للرئيسية، ومن الرئيسية محتاج ضغطتين للخروج */
+let lastBackAt = 0;
+function armBack(){ try{ history.pushState({guard:1},''); }catch(e){} }
+window.addEventListener('popstate',()=>{
+  const open = ['confirmModal','catModal','formModal','settingsModal','detailModal'].find(id=>!$(id).classList.contains('hidden'));
+  if(open){ closeModal(open); armBack(); return; }
+  if(view==='cat'){ goHome(true); armBack(); return; }
+  if($('appView').classList.contains('hidden')) return;      // صفحة الدخول
+  if(Date.now()-lastBackAt < 2000){ history.back(); return; } // ضغطة تانية = خروج
+  lastBackAt = Date.now(); toast('دوس رجوع مرة كمان للخروج'); armBack();
+});
 function homeHTML(){
   const cats = allCats();
   const cnt = c => PRODUCTS.filter(p=>p.category===c).length;
