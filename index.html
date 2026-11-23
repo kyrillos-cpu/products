@@ -13,6 +13,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="المركبات">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://lh3.googleusercontent.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -325,6 +326,19 @@ function fillFilters(){
   $('coList').innerHTML = uniq(PRODUCTS.map(p=>p.company)).map(x=>`<option value="${esc(x)}">`).join('');
 }
 
+/* ---------- Images (نسخة صغيرة سريعة من سيرفر جوجل) ---------- */
+function imgId(p){
+  if(p.imageId) return String(p.imageId);
+  const m = String(p.imageUrl||'').match(/[?&]id=([^&]+)/) || String(p.imageUrl||'').match(/\/d\/([^/=?]+)/);
+  return m ? m[1] : '';
+}
+function imgSrc(p, w){ const id=imgId(p); return id ? `https://lh3.googleusercontent.com/d/${id}=w${w}` : p.imageUrl; }
+function imgFallback(p, w){ const id=imgId(p); return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w${w}` : ''; }
+function imgTag(p, w, cls, lazy){
+  const fb = imgFallback(p, w);
+  return `<img class="${cls}" ${lazy?'loading="lazy"':''} decoding="async" src="${esc(imgSrc(p,w))}" data-fb="${esc(fb)}" onerror="if(this.dataset.fb&&this.src!==this.dataset.fb){this.src=this.dataset.fb}else{this.outerHTML='<div class=${cls==='thumb'?'thumb':'img-prev'}>🧪</div>'}">`;
+}
+
 /* ---------- Helpers ---------- */
 function uniq(a){ return [...new Set(a.map(x=>String(x||'').trim()).filter(Boolean))].sort((x,y)=>x.localeCompare(y,'ar')) }
 function esc(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])) }
@@ -451,7 +465,7 @@ function render(){
 
 function cardHTML(p){
   const miss = missingList(p);
-  const img = p.imageUrl ? `<img class="thumb" loading="lazy" src="${esc(p.imageUrl)}" onerror="this.outerHTML='<div class=thumb>🧪</div>'">` : `<div class="thumb">🧪</div>`;
+  const img = p.imageUrl ? imgTag(p, 160, 'thumb', true) : `<div class="thumb">🧪</div>`;
   return `<div class="card" onclick="openDetail('${esc(p.id)}')">
     ${img}
     <div class="cbody">
@@ -476,7 +490,7 @@ function openDetail(id){
   const row=(k,v)=>`<div class="drow"><span>${k}</span><span>${v}</span></div>`;
   const pr=(sell)=>{ const m=marginTxt(sell,p.purchasePrice).replace(/<[^>]+>/g,''); return money(sell)+(m?` <small style="color:var(--green2)">${m}</small>`:''); };
   $('dBody').innerHTML =
-    (p.imageUrl?`<img class="big-img" src="${esc(p.imageUrl)}">`:'') +
+    (p.imageUrl? imgTag(p, 800, 'big-img', false) :'') +
     row('التصنيف', esc(p.category||'—')) +
     row('المادة الفعالة', esc(p.activeIngredient||'—')) +
     row('الشركة', esc(p.company||'—')) +
@@ -511,7 +525,7 @@ function openForm(p){
   $('fWhole').value = p?.wholesalePrice ?? '';
   $('fRetail').value = p?.retailPrice ?? '';
   $('fNotes').value = p?.notes||'';
-  setPreview(p?.imageUrl||'');
+  setPreview(p?.imageUrl ? imgSrc(p,300) : '');
   $('btnDelete').classList.toggle('hidden', !p);
   marginPreview();
   $('formModal').classList.remove('hidden');
@@ -535,12 +549,12 @@ function pickImage(input){
   reader.onload = e=>{
     const img = new Image();
     img.onload = ()=>{
-      const max=1000, scale=Math.min(1, max/Math.max(img.width,img.height));
+      const max=900, scale=Math.min(1, max/Math.max(img.width,img.height));
       const c=document.createElement('canvas');
       c.width=Math.round(img.width*scale); c.height=Math.round(img.height*scale);
       const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,c.width,c.height);
       ctx.drawImage(img,0,0,c.width,c.height);
-      const data=c.toDataURL('image/jpeg',0.82);
+      const data=c.toDataURL('image/jpeg',0.78);
       pendingImage={data, mime:'image/jpeg'}; removeImg=false;
       setPreview(data);
     };
@@ -619,6 +633,7 @@ function exportCSV(){
 }
 
 /* ---------- Start ---------- */
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
 (function init(){
   $('loginCode').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
   $('newCatName').addEventListener('keydown',e=>{ if(e.key==='Enter') addCategory(); });
