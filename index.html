@@ -118,6 +118,88 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-wei
 .drow span:first-child{color:var(--muted)}
 .drow span:last-child{font-weight:600;text-align:left}
 
+/* ===== عروض الأسعار ===== */
+.qv{padding:10px 12px 100px;display:grid;gap:10px;max-width:720px;margin:0 auto}
+.qsub{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}
+.qcard{background:#fff;border-radius:var(--radius);padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.qcard label:first-child{margin-top:0}
+.qhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.qitem{display:flex;gap:8px;padding:8px 0;border-top:1px solid var(--line);align-items:flex-start}
+.qitem:first-child{border-top:0}
+.qthumb{width:56px;height:56px;border-radius:9px;object-fit:cover;background:var(--soft);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px}
+.qinfo{flex:1;min-width:0}
+.qnums{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px}
+.qnums label{margin:0;font-size:11.5px}
+.qnums .inp{padding:7px 8px}
+.qbtns{display:grid;gap:4px}
+.qbtns button{border:1px solid var(--line);background:#fff;border-radius:8px;width:32px;height:28px;cursor:pointer;color:var(--muted)}
+.qbtns button:disabled{opacity:.3}
+.qbtns .del{color:var(--red)}
+.qtotal{text-align:left;font-weight:800;color:var(--green);margin-top:6px}
+.qactions{position:sticky;bottom:max(10px,env(safe-area-inset-bottom));background:var(--bg);padding:8px 0}
+.btn.pri.alt{background:var(--amber)}
+.sheet.tall{display:flex;flex-direction:column;height:92vh}
+.pklist{flex:1;overflow-y:auto;margin-top:8px;display:grid;gap:6px;align-content:start}
+.pk{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px;text-align:start;font:inherit;color:var(--text);cursor:pointer}
+.pk.on{border-color:var(--green2);background:var(--soft)}
+.pkimg{width:44px;height:44px;border-radius:8px;object-fit:cover;background:var(--soft);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pkname{flex:1;font-weight:700;min-width:0}
+.pkname small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.pkprice{font-weight:700;font-size:13px;color:var(--green)}
+.pkchk{width:30px;height:30px;border-radius:50%;background:var(--soft);color:var(--green);display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0}
+.pk.on .pkchk{background:var(--green);color:#fff}
+.qpreview{position:fixed;inset:0;background:#5d6b64;z-index:60;overflow:auto;padding-bottom:30px}
+.qptools{position:sticky;top:0;z-index:2;display:flex;gap:6px;padding:10px;padding-top:max(10px,env(safe-area-inset-top));background:#2f3a35;flex-wrap:wrap}
+.qptools .btn{padding:9px 12px}
+.qppages{margin:10px auto 0}
+.qpage{width:794px;height:1123px;background:#fff;box-sizing:border-box;padding:38px 42px 50px;position:relative;direction:rtl;font-family:'Cairo',sans-serif;color:#1d2a24;box-shadow:0 2px 12px rgba(0,0,0,.25);overflow:hidden}
+.qp-holder{position:fixed;left:-30000px;top:0}
+.qp-holder .qpage{box-shadow:none}
+.qp-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #1f5f3f;padding-bottom:14px}
+.qp-head.small{padding-bottom:8px;border-bottom-width:2px;align-items:center}
+.qp-co{display:flex;gap:12px;align-items:center}
+.qp-co img{width:64px;height:64px;border-radius:14px}
+.qp-head.small .qp-co img{width:36px;height:36px;border-radius:8px}
+.qp-co b{display:block;font-size:24px;color:#1f5f3f;font-weight:800}
+.qp-head.small .qp-co b{font-size:17px}
+.qp-co span{font-size:13px;color:#6b7a72;letter-spacing:1px}
+.qp-title{text-align:left;display:flex;flex-direction:column;gap:2px}
+.qp-title b{font-size:28px;color:#c27c0e;font-weight:800}
+.qp-title span{font-size:14px;color:#3a4a42;font-weight:600}
+.qp-to{margin:16px 0 14px;background:#eaf4ee;border-radius:10px;padding:10px 14px;font-size:16px}
+.qp-to span{color:#4b5d54;font-weight:600}
+.qp-to b{font-size:18px;color:#1f5f3f}
+.qp-table{width:100%;border-collapse:collapse;margin-top:12px;font-size:13.5px}
+.qp-table th{background:#1f5f3f;color:#fff;padding:8px 6px;font-weight:700;font-size:13px}
+.qp-table th:first-child{border-radius:0 8px 0 0}.qp-table th:last-child{border-radius:8px 0 0 0}
+.qp-table td{border-bottom:1px solid #e2e8e4;padding:6px;text-align:center;vertical-align:middle;height:72px;box-sizing:border-box}
+.qp-table tr:nth-child(even) td{background:#f7faf8}
+.qp-table td img{width:60px;height:60px;object-fit:contain;border-radius:8px;background:#fff;display:block;margin:0 auto}
+.qp-noimg{font-size:26px}
+.qp-name{text-align:right!important}
+.qp-name b{font-size:15px;display:block}
+.qp-name small{display:block;color:#6b7a72;font-size:11.5px;line-height:1.5}
+.qp-num{font-weight:700;white-space:nowrap}
+.qp-foot{margin-top:18px;display:grid;gap:12px}
+.qp-total{text-align:left;font-size:18px;background:#fdf1dd;border-radius:10px;padding:10px 14px;color:#7a4e08}
+.qp-total b{font-size:21px}
+.qp-notes{border:1px dashed #b9c7bf;border-radius:10px;padding:10px 14px;font-size:14px;line-height:1.7}
+.qp-sign{text-align:left;margin-top:10px;font-size:14px;color:#4b5d54}
+.qp-sign b{display:block;font-size:17px;color:#1f5f3f}
+.qp-pn{position:absolute;bottom:18px;left:42px;right:42px;text-align:center;font-size:11.5px;color:#8a978f;border-top:1px solid #e2e8e4;padding-top:6px}
+#printArea{display:none}
+@media print{
+  @page{size:A4;margin:0}
+  body>*{display:none!important}
+  #printArea{display:block!important}
+  #printArea .qpage{box-shadow:none;page-break-after:always;break-after:page;width:210mm;height:297mm;transform:none!important}
+  #printArea .qp-table th,#printArea .qp-table tr:nth-child(even) td,#printArea .qp-to,#printArea .qp-total{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+.cat-tile.quote{background:linear-gradient(135deg,#c27c0e,#a86708);color:#fff}
+.cat-tile.quote .cat-ic{background:rgba(255,255,255,.2)}
+.cat-tile.quote .cat-n{background:rgba(255,255,255,.25);color:#fff}
+.cat-tile.quote .cat-arrow{color:#fff}
+
 /* login */
 .login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(160deg,var(--green),#123d28)}
 .login .box{background:#fff;border-radius:18px;padding:26px 20px;width:100%;max-width:360px;text-align:center}
@@ -178,7 +260,65 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-wei
 
   <main id="list"></main>
   <button class="fab" onclick="openForm()">＋ مركب جديد</button>
+
+  <!-- ===== عروض الأسعار ===== -->
+  <section id="quotesView" class="qv hidden">
+    <div class="catbar"><button class="home-btn" onclick="goHome()">🏠 الرئيسية</button><b>عروض الأسعار</b></div>
+    <input id="qq" class="search" type="search" placeholder="🔍 ابحث باسم العميل أو رقم العرض" oninput="renderQuotes()">
+    <div id="quoteList"></div>
+  </section>
+
+  <section id="quoteEdit" class="qv hidden">
+    <div class="catbar"><button class="home-btn" onclick="backToQuotes()">‹ العروض</button><b id="qeTitle">عرض جديد</b></div>
+    <div class="qcard">
+      <label>إلى / السادة *</label>
+      <input id="qeClient" class="inp" placeholder="اسم العميل أو الشركة" oninput="qeField()">
+      <div class="grid2">
+        <div><label>التاريخ</label><input id="qeDate" type="date" class="inp" oninput="qeField()"></div>
+        <div><label>الأسعار المعروضة</label>
+          <select id="qePriceType" class="inp" onchange="applyPriceType()">
+            <option value="wholesale">سعر الجملة</option>
+            <option value="retail">سعر البيع التجاري</option>
+          </select></div>
+      </div>
+      <p class="hint">سعر الشراء عمره ما بيظهر في العرض. وتقدر تعدّل سعر أي صنف في العرض ده من غير ما يتغير في المركبات.</p>
+    </div>
+    <div class="qcard">
+      <div class="qhead"><b>المركبات <span id="qeCount"></span></b><button class="btn sec" onclick="openPicker()">＋ إضافة مركب</button></div>
+      <div id="qeItems"></div>
+      <div id="qeTotal" class="qtotal"></div>
+    </div>
+    <div class="qcard">
+      <label>ملاحظات (بتظهر في آخر العرض)</label>
+      <textarea id="qeNotes" class="inp" rows="3" placeholder="مثال: الأسعار سارية لمدة أسبوع" oninput="qeField()"></textarea>
+    </div>
+    <div class="actions qactions">
+      <button class="btn pri" onclick="saveQuote()">💾 حفظ</button>
+      <button class="btn pri alt" onclick="previewQuote()">📄 عرض ومشاركة</button>
+      <button class="btn dan hidden" id="qeDelete" onclick="askDeleteQuote()">حذف</button>
+    </div>
+  </section>
 </div>
+
+<div id="pickerModal" class="overlay hidden" onclick="if(event.target===this)closeModal('pickerModal')">
+  <div class="sheet tall">
+    <h2>اختار المركبات <span id="pkCount" class="badge"></span><button class="x" onclick="closeModal('pickerModal')">✕</button></h2>
+    <input id="pkQ" class="search" type="search" placeholder="🔍 ابحث بالاسم أو المادة الفعالة" oninput="renderPicker()">
+    <div id="pkList" class="pklist"></div>
+    <div class="actions"><button class="btn pri" onclick="closeModal('pickerModal')">تم</button></div>
+  </div>
+</div>
+
+<div id="quotePreview" class="qpreview hidden">
+  <div class="qptools">
+    <button class="btn pri" onclick="sharePdf()">📤 مشاركة PDF</button>
+    <button class="btn sec" onclick="downloadPdf()">⬇ تحميل</button>
+    <button class="btn sec" onclick="printQuote()">🖨 طباعة</button>
+    <button class="btn sec" onclick="closeModal('quotePreview')">✕</button>
+  </div>
+  <div id="qpPages" class="qppages"></div>
+</div>
+<div id="printArea"></div>
 
 <!-- ===== Modals ===== -->
 <div id="formModal" class="overlay hidden" onclick="if(event.target===this)closeModal('formModal')">
@@ -271,11 +411,12 @@ label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px;font-wei
 <div id="loader" class="loader hidden"><div class="spin"></div></div>
 <div id="toast" class="toast hidden"></div>
 
+<script src="quotes.js?v=1"></script>
 <script>
 /* ======= حط هنا رابط الـ Web App بتاع Apps Script ======= */
 const API_URL = 'https://script.google.com/macros/s/AKfycbxlXkRGroUHjtBXplaxacVd-NTBwGy1yGI8jPg-SRzdeiS5WJKaC5bgHJ8nQnCCaBaK/exec';
 
-let PRODUCTS = [], SETTINGS = {categories:[], branches:[]};
+let PRODUCTS = [], SETTINGS = {categories:[], branches:[]}, QUOTES = [];
 let editing = null, pendingImage = null, removeImg = false, onlyMissing = false, currentCat = '', view = 'home';
 
 const $ = id => document.getElementById(id);
@@ -313,9 +454,10 @@ async function loadAll(silentThrow){
   if(!silentThrow) loading(true);
   try{
     const j = await api('list');
-    PRODUCTS = j.products; SETTINGS = j.settings;
-    store.set('pc_cache', JSON.stringify({PRODUCTS, SETTINGS}));
+    PRODUCTS = j.products; SETTINGS = j.settings; QUOTES = j.quotes || [];
+    store.set('pc_cache', JSON.stringify({PRODUCTS, SETTINGS, QUOTES}));
     fillFilters(); render();
+    if(view==='quotes') renderQuotes();
   }catch(e){ if(silentThrow) throw e; toast(e.message); }
   finally{ if(!silentThrow) loading(false); }
 }
@@ -384,8 +526,10 @@ function goHome(fromPop){
 let lastBackAt = 0;
 function armBack(){ try{ history.pushState({guard:1},''); }catch(e){} }
 window.addEventListener('popstate',()=>{
-  const open = ['confirmModal','catModal','formModal','settingsModal','detailModal'].find(id=>!$(id).classList.contains('hidden'));
+  const open = ['confirmModal','quotePreview','pickerModal','catModal','formModal','settingsModal','detailModal'].find(id=>!$(id).classList.contains('hidden'));
   if(open){ closeModal(open); armBack(); return; }
+  if(view==='quote'){ armBack(); backToQuotes(); return; }
+  if(view==='quotes'){ goHome(true); armBack(); return; }
   if(view==='cat'){ goHome(true); armBack(); return; }
   if($('appView').classList.contains('hidden')) return;      // صفحة الدخول
   if(Date.now()-lastBackAt < 2000){ history.back(); return; } // ضغطة تانية = خروج
@@ -396,6 +540,7 @@ function homeHTML(){
   const cnt = c => PRODUCTS.filter(p=>p.category===c).length;
   const tile=(key,icon,label,n,cls='')=>`<button class="cat-tile ${cls}" onclick='setCat(${JSON.stringify(key).replace(/'/g,"&#39;")})'><span class="cat-ic">${icon}</span><span class="cat-name">${esc(label)}</span><span class="cat-n">${n}</span><span class="cat-arrow">‹</span></button>`;
   let h = '<div class="cat-list">';
+  h += `<button class="cat-tile quote" onclick="openQuotes()"><span class="cat-ic">📄</span><span class="cat-name">عروض الأسعار</span><span class="cat-n">${QUOTES.length}</span><span class="cat-arrow">‹</span></button>`;
   h += tile('', '🧪', 'كل المركبات', PRODUCTS.length, 'all');
   h += cats.map(c=>tile(c, catIcon(c), c, cnt(c))).join('');
   const none = PRODUCTS.filter(p=>!p.category).length;
@@ -426,6 +571,8 @@ function catChanged(){
 function toggleMissing(){ onlyMissing=!onlyMissing; $('chipMissing').classList.toggle('on',onlyMissing); render(); }
 
 function render(){
+  if(view==='quotes'||view==='quote') return;
+  syncSections();
   const isHome = view==='home';
   document.querySelector('.tools').classList.toggle('home', isHome);
   $('catBar').classList.toggle('hidden', isHome);
@@ -655,7 +802,7 @@ if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.s
   $('newCatName').addEventListener('keydown',e=>{ if(e.key==='Enter') addCategory(); });
   if(!store.get('pc_code')){ $('loginView').classList.remove('hidden'); return; }
   const cache = store.get('pc_cache');
-  if(cache){ try{ const c=JSON.parse(cache); PRODUCTS=c.PRODUCTS; SETTINGS=c.SETTINGS; }catch(e){} }
+  if(cache){ try{ const c=JSON.parse(cache); PRODUCTS=c.PRODUCTS; SETTINGS=c.SETTINGS; QUOTES=c.QUOTES||[]; }catch(e){} }
   showApp(); fillFilters(); render(); loadAll();
 })();
 </script>
