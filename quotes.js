@@ -69,6 +69,7 @@ function showEditor(){
   $('qeClient').value = QE.client; $('qeDate').value = QE.date;
   $('qePriceType').value = QE.priceType||'wholesale'; $('qeNotes').value = QE.notes||'';
   $('qeDelete').classList.toggle('hidden', !QE.id);
+  setSyncState(pendingQ[QE.id] ? '⏳ بيترفع...' : '');
   renderQEItems(); window.scrollTo({top:0});
 }
 function qeField(){ QE.client=$('qeClient').value; QE.date=$('qeDate').value; QE.notes=$('qeNotes').value; qeDirty=true; }
@@ -148,30 +149,51 @@ function togglePick(pid){
 }
 
 /* ---------- حفظ / حذف ---------- */
-async function saveQuote(silent){
+// الحفظ بيحصل فورًا على الموبايل، والرفع للشيت بيكمل في الخلفية
+function nextQuoteNumber(){
+  let max=0; QUOTES.forEach(x=>{ const n=parseInt(String(x.number).replace(/\D/g,''),10); if(n>max) max=n; });
+  return 'Q-'+String(max+1).padStart(4,'0');
+}
+function cacheQuotes(){ store.set('pc_cache', JSON.stringify({PRODUCTS, SETTINGS, QUOTES})); }
+function setSyncState(txt){ const el=$('qeSync'); if(el) el.textContent=txt; }
+const pendingQ = {};
+async function pushQuote(q, attempt=1){
+  pendingQ[q.id]=true; setSyncState('⏳ بيترفع...');
+  try{
+    const j = await api('saveQuote',{quote:q});
+    delete pendingQ[q.id];
+    const i = QUOTES.findIndex(x=>x.id===j.quote.id);
+    if(i>=0 && QUOTES[i].updatedAt===q.updatedAt){ QUOTES[i].number=j.quote.number; }
+    if(QE && QE.id===q.id){ QE.number=j.quote.number; $('qeTitle').textContent=`عرض ${QE.number}`; }
+    cacheQuotes(); if(view==='quotes') renderQuotes();
+    if(!Object.keys(pendingQ).length) setSyncState('☁️ محفوظ');
+  }catch(e){
+    if(/أمر غير معروف/.test(e.message)){ delete pendingQ[q.id]; setSyncState('⚠ ما اتحفظش'); return toast('لازم تحدّث كود Apps Script الأول'); }
+    if(attempt<4){ setSyncState('⚠ النت ضعيف — بحاول تاني'); setTimeout(()=>pushQuote(q, attempt+1), attempt*3000); }
+    else { delete pendingQ[q.id]; setSyncState('⚠ ما اتحفظش على السيرفر'); toast('العرض ما اترفعش — دوس حفظ تاني لما النت يرجع'); }
+  }
+}
+function saveQuote(silent){
   qeField();
   if(!QE.client.trim()) { toast('اكتب اسم العميل (إلى / السادة)'); $('qeClient').focus(); return false; }
   if(!QE.items.length) { toast('ضيف مركب واحد على الأقل'); return false; }
-  loading(true);
-  try{
-    const j = await api('saveQuote',{quote:QE});
-    const i = QUOTES.findIndex(x=>x.id===j.quote.id);
-    if(i>=0) QUOTES[i]=j.quote; else QUOTES.push(j.quote);
-    QE = JSON.parse(JSON.stringify(j.quote)); QE.date=String(QE.date).slice(0,10);
-    qeDirty=false;
-    $('qeTitle').textContent = `عرض ${QE.number}`; $('qeDelete').classList.remove('hidden');
-    if(!silent) toast('اتحفظ العرض ✅');
-    return true;
-  }catch(e){
-    toast(/أمر غير معروف/.test(e.message) ? 'لازم تحدّث كود Apps Script الأول (عروض الأسعار)' : e.message);
-    return false;
-  }finally{ loading(false); }
+  if(!QE.id){ QE.id='Q'+Date.now(); QE.number=nextQuoteNumber(); }
+  QE.updatedAt = new Date().toISOString();
+  const copy = JSON.parse(JSON.stringify(QE));
+  const i = QUOTES.findIndex(x=>x.id===copy.id);
+  if(i>=0) QUOTES[i]=copy; else QUOTES.push(copy);
+  cacheQuotes();
+  qeDirty=false;
+  $('qeTitle').textContent = `عرض ${QE.number}`; $('qeDelete').classList.remove('hidden');
+  if(!silent) toast('اتحفظ العرض ✅');
+  pushQuote(JSON.parse(JSON.stringify(copy)));
+  return true;
 }
 function askDeleteQuote(){
-  askConfirm(`تحذف عرض ${QE.number} (${QE.client})؟`,'أيوه احذف', async ()=>{
-    loading(true);
-    try{ await api('deleteQuote',{id:QE.id}); QUOTES=QUOTES.filter(x=>x.id!==QE.id); qeDirty=false; backToQuotes(true); toast('اتحذف'); }
-    catch(e){ toast(e.message); } finally{ loading(false); }
+  askConfirm(`تحذف عرض ${QE.number} (${QE.client})؟`,'أيوه احذف', ()=>{
+    const id=QE.id;
+    QUOTES=QUOTES.filter(x=>x.id!==id); cacheQuotes(); qeDirty=false; backToQuotes(true); toast('اتحذف');
+    api('deleteQuote',{id}).catch(()=>toast('الحذف ما اترفعش — النت ضعيف'));
   });
 }
 function askConfirm(text, yes, fn){
@@ -231,7 +253,7 @@ function pagesHTML(q){
 
 /* ---------- معاينة / مشاركة / طباعة ---------- */
 async function previewQuote(){
-  if(qeDirty || !QE.id){ const ok = await saveQuote(true); if(!ok) return; }
+  if(qeDirty || !QE.id){ if(!saveQuote(true)) return; }
   $('qpPages').innerHTML = pagesHTML(QE);
   fitPreview();
   $('quotePreview').classList.remove('hidden');
